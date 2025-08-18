@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: transform 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        #visualization {
+            margin-top: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-text {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Step 1: Welcome & Basic Info -->
+        <div class="step active" id="step1">
+            <h1>🧠 MBTI Quiz</h1>
+            <p>let's figure out your personality type bruh!</p>
+            
+            <input type="text" id="name" placeholder="what's your name?" required>
+            <input type="number" id="age" placeholder="age?" min="13" max="100" required>
+            <input type="text" id="city" placeholder="which city you from?" required>
+            <input type="text" id="goals" placeholder="what are your main goals rn?" required>
+            
+            <button onclick="nextStep()">let's go! →</button>
+        </div>
+
+        <!-- Steps 2-9: Quiz Questions -->
+        <div class="step" id="step2">
+            <div class="progress-bar">
+                <div class="progress" style="width: 12.5%"></div>
+            </div>
+            <div class="question">
+                <h2>at a party, you usually...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'E', 3)">
+                        work the room, meet everyone, total social butterfly mode
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'E', 1)">
+                        hang with a few close friends, selective socializing
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'I', 1)">
+                        find a quiet corner, maybe deep convo with 1-2 people
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'I', 3)">
+                        honestly? probably leave early, parties drain me
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step3">
+            <div class="progress-bar">
+                <div class="progress" style="width: 25%"></div>
+            </div>
+            <div class="question">
+                <h2>when learning something new...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'S', 3)">
+                        give me step-by-step tutorials, practical examples
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'S', 1)">
+                        show me how it works in real life first
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'N', 1)">
+                        let me see the big picture, then drill down
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'N', 3)">
+                        i want to understand the theory, the 'why' behind it
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step4">
+            <div class="progress-bar">
+                <div class="progress" style="width: 37.5%"></div>
+            </div>
+            <div class="question">
+                <h2>when making important decisions...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'T', 3)">
+                        logic first, what makes the most sense objectively?
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'T', 1)">
+                        weigh pros/cons, but consider people's feelings too
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'F', 1)">
+                        think about impact on others, but be practical
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'F', 3)">
+                        how will this affect everyone? harmony matters most
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step5">
+            <div class="progress-bar">
+                <div class="progress" style="width: 50%"></div>
+            </div>
+            <div class="question">
+                <h2>your ideal work style is...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'J', 3)">
+                        planned schedules, clear deadlines, organized af
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'J', 1)">
+                        some structure, but flexibility when needed
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'P', 1)">
+                        go with the flow, adapt as things change
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'P', 3)">
+                        spontaneous, hate rigid schedules, freedom > structure
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step6">
+            <div class="progress-bar">
+                <div class="progress" style="width: 62.5%"></div>
+            </div>
+            <div class="question">
+                <h2>when brainstorming ideas...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'N', 3)">
+                        love abstract concepts, future possibilities
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'N', 1)">
+                        mix of creative and practical thinking
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'S', 1)">
+                        focus on what's realistic and doable
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'S', 3)">
+                        stick to proven methods, why fix what works?
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step7">
+            <div class="progress-bar">
+                <div class="progress" style="width: 75%"></div>
+            </div>
+            <div class="question">
+                <h2>in group projects...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'E', 3)">
+                        i naturally take charge, coordinate everyone
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'E', 1)">
+                        contribute actively, good team player
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'I', 1)">
+                        do my part well, prefer smaller groups
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'I', 3)">
+                        work better solo, groups can be chaotic
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step8">
+            <div class="progress-bar">
+                <div class="progress" style="width: 87.5%"></div>
+            </div>
+            <div class="question">
+                <h2>when someone's upset with you...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'F', 3)">
+                        immediately worried about their feelings
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'F', 1)">
+                        want to understand and make things right
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'T', 1)">
+                        try to solve the problem logically
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'T', 3)">
+                        need to know the facts first, emotions can wait
+                    </div>
+                </div>
+            </div>
+            <button onclick="nextStep()" id="next-btn" disabled>next →</button>
+        </div>
+
+        <div class="step" id="step9">
+            <div class="progress-bar">
+                <div class="progress" style="width: 100%"></div>
+            </div>
+            <div class="question">
+                <h2>your approach to deadlines...</h2>
+                <div class="options">
+                    <div class="option" onclick="selectAnswer(this, 'J', 3)">
+                        finish early, hate last-minute stress
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'J', 1)">
+                        usually on time, sometimes need reminders
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'P', 1)">
+                        work better under pressure, but manage okay
+                    </div>
+                    <div class="option" onclick="selectAnswer(this, 'P', 3)">
+                        procrastinate king/queen, somehow pull it off
+                    </div>
+                </div>
+            </div>
+            <button onclick="calculateResults()" id="next-btn" disabled>see my results! 🎯</button>
+        </div>
+
+        <!-- Results -->
+        <div class="step" id="results">
+            <h1>your personality type ✨</h1>
+            <h2 id="mbti-type"></h2>
+            <div class="result-text">
+                <p><strong>hey <span id="user-name"></span>!</strong></p>
+                <p id="type-description"></p>
+            </div>
+            <div id="visualization"></div>
+            <button onclick="restart()">take again? 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let answers = {
+            E: 0, I: 0,  // Extroversion vs Introversion
+            S: 0, N: 0,  // Sensing vs Intuition
+            T: 0, F: 0,  // Thinking vs Feeling
+            J: 0, P: 0   // Judging vs Perceiving
+        };
+        let userData = {};
+
+        function nextStep() {
+            if (currentStep === 1) {
+                // Collect user data
+                userData.name = document.getElementById('name').value;
+                userData.age = document.getElementById('age').value;
+                userData.city = document.getElementById('city').value;
+                userData.goals = document.getElementById('goals').value;
+
+                if (!userData.name || !userData.age || !userData.city || !userData.goals) {
+                    alert('yaar please fill all fields!');
+                    return;
+                }
+            }
+
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep++;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            
+            // Reset next button for new step
+            const nextBtn = document.getElementById('next-btn');
+            if (nextBtn) {
+                nextBtn.disabled = true;
+            }
+        }
+
+        function selectAnswer(element, trait, weight) {
+            // Remove previous selection
+            const options = element.parentElement.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            element.classList.add('selected');
+            
+            // Store the answer for this question
+            const questionNum = currentStep;
+            if (!window.currentAnswers) window.currentAnswers = {};
+            window.currentAnswers[questionNum] = { trait, weight };
+            
+            // Enable next button - find the button in current step
+            const currentStepElement = document.getElementById(`step${currentStep}`);
+            const nextBtn = currentStepElement.querySelector('button');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+            }
+        }
+
+        function calculateResults() {
+            // Process all answers
+            Object.values(window.currentAnswers || {}).forEach(answer => {
+                answers[answer.trait] += answer.weight;
+            });
+
+            // Determine MBTI type
+            let mbtiType = '';
+            mbtiType += answers.E > answers.I ? 'E' : 'I';
+            mbtiType += answers.S > answers.N ? 'S' : 'N';
+            mbtiType += answers.T > answers.F ? 'T' : 'F';
+            mbtiType += answers.J > answers.P ? 'J' : 'P';
+
+            // Calculate percentages for visualization
+            const totalE_I = answers.E + answers.I;
+            const totalS_N = answers.S + answers.N;
+            const totalT_F = answers.T + answers.F;
+            const totalJ_P = answers.J + answers.P;
+
+            const percentages = {
+                E: totalE_I > 0 ? (answers.E / totalE_I) * 100 : 50,
+                S: totalS_N > 0 ? (answers.S / totalS_N) * 100 : 50,
+                T: totalT_F > 0 ? (answers.T / totalT_F) * 100 : 50,
+                J: totalJ_P > 0 ? (answers.J / totalJ_P) * 100 : 50
+            };
+
+            // Show results
+            showResults(mbtiType, percentages);
+        }
+
+        function showResults(mbtiType, percentages) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            document.getElementById('results').classList.add('active');
+            
+            document.getElementById('mbti-type').textContent = mbtiType;
+            document.getElementById('user-name').textContent = userData.name;
+            
+            // Add type description
+            const descriptions = {
+                'INTJ': "the architect - strategic, independent, future-focused. you see patterns others miss and have strong vision for what could be.",
+                'INTP': "the thinker - logical, analytical, loves abstract concepts. you question everything and seek to understand how things work.",
+                'ENTJ': "the commander - natural leader, efficient, goal-oriented. you see the big picture and know how to get things done.",
+                'ENTP': "the debater - innovative, energetic, loves possibilities. you're quick-witted and enjoy exploring new ideas.",
+                'INFJ': "the advocate - idealistic, insightful, values-driven. you want to make a meaningful impact on the world.",
+                'INFP': "the mediator - creative, empathetic, authentic. you're driven by your values and care deeply about others.",
+                'ENFJ': "the protagonist - charismatic, inspiring, people-focused. you bring out the best in others and create harmony.",
+                'ENFP': "the campaigner - enthusiastic, creative, spontaneous. you see potential everywhere and inspire others.",
+                'ISTJ': "the logistician - reliable, practical, detail-oriented. you value tradition and work steadily toward goals.",
+                'ISFJ': "the protector - caring, reliable, service-oriented. you're attentive to others' needs and maintain harmony.",
+                'ESTJ': "the executive - organized, decisive, takes charge. you're efficient and focused on getting results.",
+                'ESFJ': "the consul - supportive, outgoing, harmony-focused. you're great at bringing people together.",
+                'ISTP': "the virtuoso - practical, adaptable, hands-on. you're good at troubleshooting and staying calm under pressure.",
+                'ISFP': "the adventurer - artistic, flexible, values-driven. you're gentle but passionate about what matters to you.",
+                'ESTP': "the entrepreneur - energetic, perceptive, action-oriented. you live in the moment and adapt quickly.",
+                'ESFP': "the entertainer - enthusiastic, spontaneous, people-focused. you bring joy and energy wherever you go."
+            };
+            
+            document.getElementById('type-description').textContent = descriptions[mbtiType] || "unique personality type detected!";
+            
+            // Create visualization
+            createVisualization(mbtiType, percentages);
+        }
+
+        function createVisualization(mbtiType, percentages) {
+            const sketch = (p) => {
+                p.setup = () => {
+                    const canvas = p.createCanvas(500, 400);
+                    canvas.parent('visualization');
+                };
+
+                p.draw = () => {
+                    p.background(248, 249, 250);
+                    
+                    // Title
+                    p.textAlign(p.CENTER);
+                    p.textSize(24);
+                    p.fill(51, 51, 51);
+                    p.text(`${userData.name}'s MBTI Profile`, p.width/2, 30);
+                    
+                    p.textSize(18);
+                    p.fill(102, 126, 234);
+                    p.text(mbtiType, p.width/2, 55);
+
+                    // Draw four spectrum bars
+                    const spectrums = [
+                        { label1: 'Introvert', label2: 'Extrovert', value: percentages.E, y: 100 },
+                        { label1: 'Sensing', label2: 'Intuition', value: percentages.S > 50 ? percentages.S : 100 - percentages.S, y: 160 },
+                        { label1: 'Thinking', label2: 'Feeling', value: percentages.T > 50 ? percentages.T : 100 - percentages.T, y: 220 },
+                        { label1: 'Judging', label2: 'Perceiving', value: percentages.J > 50 ? percentages.J : 100 - percentages.J, y: 280 }
+                    ];
+
+                    spectrums.forEach((spectrum, i) => {
+                        drawSpectrum(p, spectrum, i);
+                    });
+                };
+
+                const drawSpectrum = (p, spectrum, index) => {
+                    const barWidth = 300;
+                    const barHeight = 20;
+                    const x = (p.width - barWidth) / 2;
+                    const y = spectrum.y;
+
+                    // Background bar
+                    p.fill(230, 230, 230);
+                    p.rect(x, y, barWidth, barHeight, 10);
+
+                    // Progress bar
+                    const progress = (spectrum.value / 100) * barWidth;
+                    p.fill(102, 126, 234);
+                    p.rect(x, y, progress, barHeight, 10);
+
+                    // Labels
+                    p.textAlign(p.LEFT);
+                    p.textSize(12);
+                    p.fill(85, 85, 85);
+                    
+                    // Determine which trait is dominant for labeling
+                    let leftLabel, rightLabel, percentage;
+                    if (index === 0) { // E vs I
+                        leftLabel = percentages.E > percentages.I ? 'Introvert' : 'Extrovert';
+                        rightLabel = percentages.E > percentages.I ? 'Extrovert' : 'Introvert';
+                        percentage = Math.max(percentages.E, 100 - percentages.E);
+                    } else if (index === 1) { // S vs N
+                        leftLabel = percentages.S > 50 ? 'Intuition' : 'Sensing';
+                        rightLabel = percentages.S > 50 ? 'Sensing' : 'Intuition';
+                        percentage = percentages.S > 50 ? percentages.S : 100 - percentages.S;
+                    } else if (index === 2) { // T vs F
+                        leftLabel = percentages.T > 50 ? 'Feeling' : 'Thinking';
+                        rightLabel = percentages.T > 50 ? 'Thinking' : 'Feeling';
+                        percentage = percentages.T > 50 ? percentages.T : 100 - percentages.T;
+                    } else { // J vs P
+                        leftLabel = percentages.J > 50 ? 'Perceiving' : 'Judging';
+                        rightLabel = percentages.J > 50 ? 'Judging' : 'Perceiving';
+                        percentage = percentages.J > 50 ? percentages.J : 100 - percentages.J;
+                    }
+
+                    p.text(leftLabel, x - 80, y + 15);
+                    p.textAlign(p.RIGHT);
+                    p.text(rightLabel, x + barWidth + 80, y + 15);
+                    
+                    // Percentage
+                    p.textAlign(p.CENTER);
+                    p.fill(255, 255, 255);
+                    p.textSize(14);
+                    p.text(`${Math.round(percentage)}%`, x + progress - 20, y + 15);
+                };
+            };
+
+            new p5(sketch);
+        }
+
+        function restart() {
+            currentStep = 1;
+            answers = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            userData = {};
+            window.currentAnswers = {};
+            
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show first step
+            document.getElementById('step1').classList.add('active');
+            
+            // Clear inputs
+            document.getElementById('name').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('city').value = '';
+            document.getElementById('goals').value = '';
+            
+            // Remove visualization
+            document.getElementById('visualization').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
